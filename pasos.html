@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Los 12 Pasos del Piletero · Guía Completa</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:ital,wght@0,300;0,400;0,600;0,700;1,300&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --azul: #0a1628;
+      --azul-medio: #0d2044;
+      --azul-claro: #1a3a6b;
+      --cyan: #00c8ff;
+      --blanco: #f0f4ff;
+      --gris: #8899bb;
+    }
+
+    html, body {
+      min-height: 100%;
+      background: var(--azul);
+      color: var(--blanco);
+      font-family: 'Barlow', sans-serif;
+    }
+
+    .bg {
+      position: fixed; inset: 0; z-index: 0;
+      background: radial-gradient(ellipse 80% 60% at 50% -10%, #1a3a6b44, transparent),
+                  var(--azul);
+    }
+    .grid-overlay {
+      position: fixed; inset: 0; z-index: 0;
+      background-image:
+        linear-gradient(rgba(0,200,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,200,255,0.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+    }
+
+    /* NAV */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(10,22,40,0.95);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(0,200,255,0.1);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 40px;
+    }
+    .nav-brand {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 22px; letter-spacing: 2px;
+      background: linear-gradient(135deg, #fff, var(--cyan));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .nav-right {
+      display: flex; align-items: center; gap: 20px;
+    }
+    .nav-user {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 14px; color: var(--gris); letter-spacing: 1px;
+    }
+    .btn-logout {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 13px; letter-spacing: 2px; text-transform: uppercase;
+      color: var(--gris); background: none; border: 1px solid rgba(136,153,187,0.2);
+      padding: 8px 16px; border-radius: 6px; cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-logout:hover { color: var(--blanco); border-color: rgba(0,200,255,0.3); }
+
+    /* HERO */
+    .hero {
+      position: relative; z-index: 1;
+      text-align: center; padding: 60px 24px 48px;
+      border-bottom: 1px solid rgba(0,200,255,0.08);
+    }
+    .hero-eyebrow {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 13px; font-weight: 600; letter-spacing: 4px;
+      color: var(--cyan); text-transform: uppercase; margin-bottom: 12px;
+    }
+    .hero-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(52px, 12vw, 80px);
+      line-height: 0.9; letter-spacing: 2px;
+      background: linear-gradient(135deg, #fff 0%, var(--cyan) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero-sub {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 17px; font-weight: 300; letter-spacing: 2px;
+      color: var(--gris); margin-top: 10px;
+    }
+    .hero-line {
+      width: 80px; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+      margin: 20px auto;
+    }
+
+    /* PROGRESS */
+    .progress-bar-wrap {
+      max-width: 600px; margin: 0 auto;
+    }
+    .progress-label {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 13px; letter-spacing: 2px; color: var(--gris);
+      margin-bottom: 8px;
+      display: flex; justify-content: space-between;
+    }
+    .progress-track {
+      height: 4px; background: rgba(0,200,255,0.1);
+      border-radius: 2px; overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--cyan), #0090cc);
+      border-radius: 2px;
+      transition: width 0.5s ease;
+    }
+
+    /* MAIN CONTENT */
+    main {
+      position: relative; z-index: 1;
+      max-width: 900px; margin: 0 auto;
+      padding: 60px 24px 100px;
+    }
+
+    /* PASO CARD */
+    .paso-card {
+      background: rgba(13,32,68,0.5);
+      border: 1px solid rgba(0,200,255,0.1);
+      border-radius: 16px; margin-bottom: 24px;
+      overflow: hidden; transition: border-color 0.3s;
+    }
+    .paso-card:hover { border-color: rgba(0,200,255,0.25); }
+    .paso-card.completado { border-color: rgba(0,200,100,0.3); }
+
+    .paso-header {
+      display: flex; align-items: center; gap: 20px;
+      padding: 24px 28px; cursor: pointer;
+      transition: background 0.2s;
+    }
+    .paso-header:hover { background: rgba(0,200,255,0.04); }
+
+    .paso-numero {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 36px; line-height: 1;
+      color: rgba(0,200,255,0.3); min-width: 44px;
+      transition: color 0.3s;
+    }
+    .paso-card.activo .paso-numero,
+    .paso-card:hover .paso-numero { color: var(--cyan); }
+
+    .paso-info { flex: 1; }
+    .paso-titulo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 22px; letter-spacing: 1px;
+      color: var(--blanco);
+    }
+    .paso-desc {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 14px; color: var(--gris);
+      margin-top: 3px; letter-spacing: 0.5px;
+    }
+
+    .paso-check {
+      width: 28px; height: 28px;
+      border: 2px solid rgba(0,200,255,0.2);
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      transition: all 0.3s; flex-shrink: 0; cursor: pointer;
+      font-size: 14px;
+    }
+    .paso-card.completado .paso-check {
+      background: rgba(0,200,100,0.2);
+      border-color: rgba(0,200,100,0.5);
+    }
+
+    .paso-chevron {
+      color: var(--gris); font-size: 18px;
+      transition: transform 0.3s; flex-shrink: 0;
+    }
+    .paso-card.activo .paso-chevron { transform: rotate(180deg); color: var(--cyan); }
+
+    /* VIDEO BODY */
+    .paso-body {
+      display: none; padding: 0 28px 28px;
+    }
+    .paso-card.activo .paso-body { display: block; }
+
+    .video-container {
+      border-radius: 12px; overflow: hidden;
+      border: 1px solid rgba(0,200,255,0.15);
+      box-shadow: 0 16px 40px rgba(0,0,0,0.4);
+      margin-bottom: 16px;
+    }
+    .video-container iframe {
+      display: block; width: 100%;
+      aspect-ratio: 16/9; border: none;
+    }
+
+    /* PRÓXIMAMENTE */
+    .video-pronto {
+      aspect-ratio: 16/9;
+      background: rgba(0,0,0,0.3);
+      border-radius: 12px;
+      border: 1px dashed rgba(0,200,255,0.15);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 12px;
+      margin-bottom: 16px;
+    }
+    .video-pronto-icon { font-size: 36px; opacity: 0.4; }
+    .video-pronto-text {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 16px; letter-spacing: 2px; color: var(--gris);
+      text-transform: uppercase;
+    }
+
+    .btn-completar {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 10px 20px;
+      background: rgba(0,200,100,0.1);
+      border: 1px solid rgba(0,200,100,0.3);
+      border-radius: 8px; color: #66ffbb;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 14px; letter-spacing: 2px; text-transform: uppercase;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .btn-completar:hover { background: rgba(0,200,100,0.2); }
+
+    /* QUIMICA SECTION */
+    .seccion-quimica {
+      margin-top: 48px;
+      background: rgba(13,32,68,0.5);
+      border: 1px solid rgba(0,200,255,0.15);
+      border-radius: 16px; overflow: hidden;
+    }
+    .seccion-quimica-header {
+      padding: 24px 28px;
+      border-bottom: 1px solid rgba(0,200,255,0.1);
+      display: flex; align-items: center; gap: 16px;
+    }
+    .seccion-quimica-icon { font-size: 28px; }
+    .seccion-quimica-titulo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 24px; letter-spacing: 1px;
+    }
+    .seccion-quimica-sub {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 13px; color: var(--gris); letter-spacing: 1px;
+    }
+
+    /* QUIMICA CARDS */
+    .quimica-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px; padding: 24px 28px;
+    }
+    .quimica-card {
+      background: rgba(0,0,0,0.2);
+      border: 1px solid rgba(0,200,255,0.1);
+      border-radius: 12px; padding: 20px;
+      cursor: pointer; transition: all 0.25s;
+    }
+    .quimica-card:hover {
+      border-color: rgba(0,200,255,0.3);
+      background: rgba(0,200,255,0.05);
+    }
+    .quimica-card.open { border-color: rgba(0,200,255,0.3); }
+    .quimica-card-header { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+    .quimica-emoji { font-size: 22px; }
+    .quimica-nombre {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 18px; letter-spacing: 1px;
+    }
+    .quimica-badge {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 11px; letter-spacing: 1px;
+      color: var(--cyan); background: rgba(0,200,255,0.1);
+      padding: 3px 8px; border-radius: 4px;
+      margin-left: auto;
+    }
+    .quimica-resumen {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 13px; color: var(--gris); letter-spacing: 0.5px;
+    }
+    .quimica-detalle {
+      display: none; margin-top: 16px;
+      border-top: 1px solid rgba(0,200,255,0.1);
+      padding-top: 16px;
+    }
+    .quimica-card.open .quimica-detalle { display: block; }
+    .quimica-detalle p {
+      font-size: 14px; line-height: 1.6;
+      color: rgba(240,244,255,0.75);
+      margin-bottom: 10px;
+    }
+    .quimica-detalle strong { color: var(--blanco); }
+    .tip-box {
+      background: rgba(0,200,255,0.06);
+      border-left: 3px solid var(--cyan);
+      border-radius: 0 8px 8px 0;
+      padding: 12px 16px; margin-top: 12px;
+    }
+    .tip-box p { font-size: 13px; margin: 0; color: rgba(240,244,255,0.7); }
+    .tip-box strong { color: var(--cyan); }
+
+    /* TABLA */
+    .tabla-wrap { padding: 0 28px 28px; overflow-x: auto; }
+    .tabla-titulo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 20px; letter-spacing: 1px;
+      margin-bottom: 16px; padding-top: 24px;
+      border-top: 1px solid rgba(0,200,255,0.1);
+    }
+    table {
+      width: 100%; border-collapse: collapse;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 14px;
+    }
+    th {
+      background: rgba(0,200,255,0.08);
+      color: var(--cyan); font-weight: 600; letter-spacing: 1px;
+      padding: 10px 12px; text-align: center;
+      border: 1px solid rgba(0,200,255,0.1);
+    }
+    td {
+      padding: 9px 12px; text-align: center;
+      border: 1px solid rgba(0,200,255,0.06);
+      color: rgba(240,244,255,0.8);
+    }
+    tr:nth-child(even) td { background: rgba(0,200,255,0.02); }
+    tr:hover td { background: rgba(0,200,255,0.05); }
+
+    /* PROTOCOLO */
+    .protocolo {
+      padding: 0 28px 28px;
+    }
+    .protocolo-titulo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 20px; letter-spacing: 1px; margin-bottom: 16px;
+      padding-top: 24px; border-top: 1px solid rgba(0,200,255,0.1);
+    }
+    .protocolo-steps {
+      display: flex; flex-direction: column; gap: 12px;
+    }
+    .protocolo-step {
+      display: flex; gap: 16px; align-items: flex-start;
+      background: rgba(0,0,0,0.2); border-radius: 10px; padding: 14px 18px;
+    }
+    .step-num {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 22px; color: var(--cyan); min-width: 28px;
+    }
+    .step-content { flex: 1; }
+    .step-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 15px; font-weight: 600; letter-spacing: 1px;
+      margin-bottom: 4px;
+    }
+    .step-detail {
+      font-size: 13px; color: var(--gris); line-height: 1.5;
+    }
+
+    /* COMPLETADO FINAL */
+    .completado-banner {
+      display: none;
+      text-align: center; padding: 60px 24px;
+      margin-top: 48px;
+      background: rgba(0,200,100,0.05);
+      border: 1px solid rgba(0,200,100,0.2);
+      border-radius: 20px;
+    }
+    .completado-banner.show { display: block; }
+    .completado-icon { font-size: 64px; margin-bottom: 20px; }
+    .completado-titulo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 48px; color: #66ffbb; letter-spacing: 2px;
+    }
+    .completado-sub {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 18px; color: var(--gris); margin-top: 8px;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 600px) {
+      nav { padding: 14px 16px; }
+      .nav-user { display: none; }
+      main { padding: 40px 16px 80px; }
+      .paso-header { padding: 18px 16px; gap: 14px; }
+      .paso-body { padding: 0 16px 20px; }
+      .quimica-grid { grid-template-columns: 1fr; padding: 16px; }
+      .tabla-wrap, .protocolo { padding: 0 16px 20px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg"></div>
+  <div class="grid-overlay"></div>
+
+  <nav>
+    <div class="nav-brand">El Piletero · 12 Pasos</div>
+    <div class="nav-right">
+      <div class="nav-user" id="nav-user"></div>
+      <button class="btn-logout" onclick="doLogout()">Salir</button>
+    </div>
+  </nav>
+
+  <div class="hero">
+    <div class="hero-eyebrow">Guía Profesional · Edición Completa</div>
+    <div class="hero-title">Los 12 Pasos<br>del Piletero</div>
+    <div class="hero-sub">Por José Carrizo · 30 años de experiencia</div>
+    <div class="hero-line"></div>
+    <div class="progress-bar-wrap">
+      <div class="progress-label">
+        <span>Tu progreso</span>
+        <span id="progress-text">0 / 12 pasos</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+      </div>
+    </div>
+  </div>
+
+  <main id="main-content">
+    <!-- Los pasos se generan con JS -->
+  </main>
+
+  <script>
+    const SUPABASE_URL = 'https://qwdrddaigmnacdzwlhwm.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF3ZHJkZGFpZ21uYWNkendsaHdtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2NTgwNDAsImV4cCI6MjA5NjIzNDA0MH0.htgA0cm1Ms7rffFm3RNRty3LF-rudRURlZwTjF0CaCg';
+    const { createClient } = supabase;
+    const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // PASOS DATA
+    const pasos = [
+      { num: 1, titulo: "Inspección General", desc: "Revisá el estado visual de la pileta antes de arrancar", video: "OrIgYLlrRkU" },
+      { num: 2, titulo: "Revisión del Equipo", desc: "Bomba, filtro, skimmer y conexiones", video: "ZPdWeFyH5TU" },
+      { num: 3, titulo: "Medición del pH", desc: "La base de todo tratamiento químico correcto", video: "eS-raKtvf4k" },
+      { num: 4, titulo: "Corrección del pH", desc: "pH– o pH+ según lo que marque el testeador", video: null },
+      { num: 5, titulo: "Medición del Cloro", desc: "Nivel libre y total en el agua", video: null },
+      { num: 6, titulo: "Tratamiento de Cloro", desc: "Granulado o pastillas según el caso", video: null },
+      { num: 7, titulo: "Aplicación de Algicida", desc: "Prevención semanal de algas", video: null },
+      { num: 8, titulo: "Limpieza de Skimmer", desc: "Canasto y superficie del agua", video: null },
+      { num: 9, titulo: "Cepillado de Paredes", desc: "Liner, azulejos y esquinas", video: null },
+      { num: 10, titulo: "Barrefondo", desc: "Técnica correcta según tipo de suciedad", video: null },
+      { num: 11, titulo: "Contrapresión y Lavado del Filtro", desc: "Cuándo y cómo retrolabar", video: null },
+      { num: 12, titulo: "Registro y Cierre", desc: "Anotá los valores y el trabajo realizado", video: null },
+    ];
+
+    let completados = JSON.parse(localStorage.getItem('piletero-completados') || '[]');
+    let pasoActivo = null;
+
+    // AUTH CHECK
+    sb.auth.getSession().then(async ({ data }) => {
+      if (!data.session) return window.location.href = '/';
+      const user = data.session.user;
+      const { data: usuario } = await sb.from('usuarios').select('acceso_activo, nombre').eq('id', user.id).single();
+      if (!usuario?.acceso_activo) return window.location.href = '/bienvenida.html';
+      const nombre = usuario.nombre || user.user_metadata?.nombre || user.email.split('@')[0];
+      document.getElementById('nav-user').textContent = nombre;
+      renderPasos();
+    });
+
+    function renderPasos() {
+      const main = document.getElementById('main-content');
+      let html = '';
+
+      pasos.forEach((paso, i) => {
+        const done = completados.includes(paso.num);
+        const videoHtml = paso.video
+          ? `<div class="video-container"><iframe src="https://www.youtube.com/embed/${paso.video}?rel=0&modestbranding=1" title="Paso ${paso.num}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>`
+          : `<div class="video-pronto"><div class="video-pronto-icon">🎬</div><div class="video-pronto-text">Video próximamente</div></div>`;
+
+        html += `
+          <div class="paso-card ${done ? 'completado' : ''}" id="paso-${paso.num}">
+            <div class="paso-header" onclick="togglePaso(${paso.num})">
+              <div class="paso-numero">0${paso.num < 10 ? paso.num : paso.num}</div>
+              <div class="paso-info">
+                <div class="paso-titulo">${paso.titulo}</div>
+                <div class="paso-desc">${paso.desc}</div>
+              </div>
+              <div class="paso-check" onclick="event.stopPropagation(); toggleCompletado(${paso.num})">${done ? '✓' : ''}</div>
+              <div class="paso-chevron">▾</div>
+            </div>
+            <div class="paso-body">
+              ${videoHtml}
+              <button class="btn-completar" onclick="toggleCompletado(${paso.num})">
+                ${done ? '✓ Completado' : '⬜ Marcar como completado'}
+              </button>
+            </div>
+          </div>`;
+      });
+
+      // SECCIÓN QUÍMICA
+      html += `
+        <div class="seccion-quimica" style="margin-top:48px">
+          <div class="seccion-quimica-header">
+            <div class="seccion-quimica-icon">🧪</div>
+            <div>
+              <div class="seccion-quimica-titulo">Guía de Productos Químicos</div>
+              <div class="seccion-quimica-sub">30 años de experiencia resumidos · Por José Carrizo</div>
+            </div>
+          </div>
+
+          <div style="padding:16px 28px 8px; background:rgba(255,200,0,0.05); border-bottom:1px solid rgba(0,200,255,0.08)">
+            <div style="display:flex;align-items:center;gap:10px;font-family:'Barlow Condensed',sans-serif;font-size:14px;color:#ffcc44;letter-spacing:1px">
+              ⚠️ <strong>REGLA DE ORO:</strong> Siempre medí antes de tirar cualquier producto. Sin medir, estás adivinando — y adivinar sale caro.
+            </div>
+          </div>
+
+          <div class="quimica-grid">
+            ${quimicaCards()}
+          </div>
+
+          <div class="tabla-wrap">
+            <div class="tabla-titulo">Tabla de Dosificación</div>
+            ${tablaHTML()}
+          </div>
+
+          <div class="protocolo">
+            <div class="protocolo-titulo">💧 Protocolo de Choque — Pileta Verde</div>
+            <div class="protocolo-steps">
+              ${protocoloSteps()}
+            </div>
+          </div>
+        </div>
+
+        <div class="completado-banner" id="completado-banner">
+          <div class="completado-icon">🏊</div>
+          <div class="completado-titulo">¡Piscina Lista!</div>
+          <div class="completado-sub">Completaste los 12 pasos del piletero profesional</div>
+        </div>
+      `;
+
+      main.innerHTML = html;
+      updateProgress();
+    }
+
+    function quimicaCards() {
+      const productos = [
+        { emoji: '🔵', nombre: 'pH Menos', badge: 'Reductor', resumen: 'Baja el pH cuando está muy alto', detalle: '<p><strong>¿Qué es?</strong> Baja el pH cuando está por encima de 7.6. Con pH alto, el cloro pierde efectividad aunque tires mucho.</p><p><strong>¿Cómo?</strong> Disolvé en balde con agua. Nunca directo sobre el liner. Con la bomba andando.</p>', tip: 'Si bajás mucho el pH de golpe, el agua se vuelve agresiva. Bajalo de a poco y volvé a medir.' },
+        { emoji: '🟢', nombre: 'pH Más', badge: 'Elevador', resumen: 'Sube el pH cuando está muy bajo', detalle: '<p><strong>¿Qué es?</strong> Sube el pH cuando baja de 7.2. El agua se vuelve corrosiva y ataca el liner y las partes metálicas.</p><p><strong>¿Cómo?</strong> Disolvé en balde y volcá con la bomba andando. Esperá al menos 4 horas antes de medir.</p>', tip: 'El pH es lo primero que tenés que corregir. Si el pH está mal, el cloro no sirve — estás tirando plata.' },
+        { emoji: '💧', nombre: 'Cloro Granulado', badge: 'Desinfectante', resumen: 'Acción rápida para mantenimiento y choque', detalle: '<p><strong>¿Qué es?</strong> La forma más rápida de subir el cloro. Ideal para el mantenimiento semanal y para los tratamientos de choque.</p><p><strong>¿Cómo?</strong> Disolvé en balde. Nunca mezclar con otros productos. Volcá distribuido por todo el perímetro.</p>', tip: 'Para un choque, doblá o triplicá la dosis. Hacelo de noche — el sol destruye el cloro libre muy rápido.' },
+        { emoji: '⭐', nombre: 'Cloro Pastillas', badge: 'Liberación lenta', resumen: 'Mantenimiento continuo entre servicios', detalle: '<p><strong>¿Qué es?</strong> Pastillas de liberación lenta que mantienen el cloro estable durante varios días. Complementan al cloro granulado.</p><p><strong>¿Cómo?</strong> Colocalas en el flotador. Revisá cada 3–4 días si queda pastilla.</p>', tip: 'Las pastillas no son suficientes solas. El mantenimiento con cloro granulado y medición sigue siendo necesario.' },
+        { emoji: '🟠', nombre: 'Algicida', badge: 'Preventivo', resumen: 'Previene y elimina algas', detalle: '<p><strong>¿Qué es?</strong> Previene y elimina las algas. No reemplaza al cloro — trabajan juntos.</p><p><strong>¿Cómo?</strong> Volcalo directo al agua con la bomba andando, distribuido por el perímetro.</p>', tip: 'Usarlo de forma preventiva es mucho más barato que usarlo para recuperar una pileta verde.' },
+        { emoji: '🔮', nombre: 'Floculante', badge: 'Clarificador', resumen: 'Devuelve la transparencia al agua', detalle: '<p><strong>¿Qué es?</strong> Agrupa partículas finas que el filtro no puede atrapar. Soluciona el agua turbia o lechosa con cloro y pH correctos.</p><p><strong>¿Cómo?</strong> Con bomba andando, circulá 2 horas, apagá y dejá reposar 24–48 hs. Barrefondo a desperdicio.</p>', tip: 'Si usás floculante, nunca mandes el barrefondo al filtro. Siempre a desperdicio. Corregí el pH antes.' },
+      ];
+      return productos.map((p, i) => `
+        <div class="quimica-card" id="qcard-${i}" onclick="toggleQuimica(${i})">
+          <div class="quimica-card-header">
+            <div class="quimica-emoji">${p.emoji}</div>
+            <div class="quimica-nombre">${p.nombre}</div>
+            <div class="quimica-badge">${p.badge}</div>
+          </div>
+          <div class="quimica-resumen">${p.resumen}</div>
+          <div class="quimica-detalle">
+            ${p.detalle}
+            <div class="tip-box"><p><strong>💡 Tip de José:</strong> ${p.tip}</p></div>
+          </div>
+        </div>`).join('');
+    }
+
+    function tablaHTML() {
+      const rows = [
+        ['10.000 L','100–150','100–150','150–200','1','100'],
+        ['15.000 L','150–200','150–200','200–280','1–2','150'],
+        ['20.000 L','200–250','200–250','280–350','2','200'],
+        ['25.000 L','250–300','250–300','350–430','2','250'],
+        ['30.000 L','300–380','300–380','430–500','2–3','300'],
+        ['40.000 L','380–500','380–500','500–650','3','400'],
+        ['50.000 L','500–620','500–620','650–800','3–4','500'],
+      ];
+      return `<table>
+        <tr><th>Capacidad</th><th>pH– (gr)</th><th>pH+ (gr)</th><th>Cloro Gran. (gr)</th><th>Pastillas</th><th>Algicida (ml)</th></tr>
+        ${rows.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join('')}</tr>`).join('')}
+      </table>
+      <div style="margin-top:12px;font-family:'Barlow Condensed',sans-serif;font-size:13px;color:var(--gris);line-height:1.8">
+        Dosis para mantenimiento semanal con agua en buen estado y pH corregido.<br>
+        Para choque de cloro (pileta verde): doblá o triplicá la dosis de cloro granulado.
+      </div>`;
+    }
+
+    function protocoloSteps() {
+      const steps = [
+        ['Retrolavar y activar equipo','Retrolavás el filtro y ponés la bomba a máxima potencia.'],
+        ['Barrefondo completo','Pasás el barrefondo completo antes de cualquier tratamiento químico.'],
+        ['Medición del pH','Solo cuando el fondo está limpio y el agua en movimiento.'],
+        ['Corrección del pH','pH– o pH+ según corresponda. Esperás al menos 4 horas.'],
+        ['Choque de cloro','Doble o triple dosis de cloro granulado. De noche para que el sol no lo destruya.'],
+      ];
+      return steps.map((s, i) => `
+        <div class="protocolo-step">
+          <div class="step-num">${i + 1}</div>
+          <div class="step-content">
+            <div class="step-title">${s[0]}</div>
+            <div class="step-detail">${s[1]}</div>
+          </div>
+        </div>`).join('');
+    }
+
+    function togglePaso(num) {
+      const card = document.getElementById(`paso-${num}`);
+      const isActivo = card.classList.contains('activo');
+      document.querySelectorAll('.paso-card').forEach(c => c.classList.remove('activo'));
+      if (!isActivo) card.classList.add('activo');
+    }
+
+    function toggleCompletado(num) {
+      const idx = completados.indexOf(num);
+      if (idx > -1) completados.splice(idx, 1);
+      else completados.push(num);
+      localStorage.setItem('piletero-completados', JSON.stringify(completados));
+      renderPasos();
+    }
+
+    function toggleQuimica(i) {
+      document.getElementById(`qcard-${i}`).classList.toggle('open');
+    }
+
+    function updateProgress() {
+      const done = completados.length;
+      const pct = (done / 12) * 100;
+      const fill = document.getElementById('progress-fill');
+      const text = document.getElementById('progress-text');
+      if (fill) fill.style.width = pct + '%';
+      if (text) text.textContent = `${done} / 12 pasos`;
+      const banner = document.getElementById('completado-banner');
+      if (banner) banner.classList.toggle('show', done === 12);
+    }
+
+    async function doLogout() {
+      await sb.auth.signOut();
+      window.location.href = '/';
+    }
+  </script>
+</body>
+</html>
