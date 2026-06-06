@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Los 12 Pasos del Piletero</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:ital,wght@0,300;0,400;0,600;0,700;1,300&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --azul: #0a1628;
+      --azul-medio: #0d2044;
+      --azul-claro: #1a3a6b;
+      --cyan: #00c8ff;
+      --cyan-suave: rgba(0,200,255,0.12);
+      --blanco: #f0f4ff;
+      --gris: #8899bb;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--azul);
+      color: var(--blanco);
+      font-family: 'Barlow', sans-serif;
+      overflow-x: hidden;
+    }
+
+    /* VIDEO FONDO */
+    .video-bg {
+      position: fixed; inset: 0; z-index: 0;
+      overflow: hidden;
+    }
+    .video-bg iframe {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 100vw;
+      height: 56.25vw; /* 16:9 ratio */
+      min-height: 100vh;
+      min-width: 177.78vh; /* 16:9 ratio */
+      border: none;
+      pointer-events: none;
+    }
+    .video-bg-overlay {
+      position: absolute; inset: 0;
+      background: rgba(10, 22, 40, 0.82);
+    }
+
+    /* FONDO ANIMADO */
+    .bg {
+      position: fixed; inset: 0; z-index: 0;
+      background: radial-gradient(ellipse 80% 60% at 50% -10%, #1a3a6b33, transparent),
+                  radial-gradient(ellipse 60% 80% at 80% 80%, #00c8ff08, transparent);
+    }
+    .grid-overlay {
+      position: fixed; inset: 0; z-index: 0;
+      background-image:
+        linear-gradient(rgba(0,200,255,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,200,255,0.04) 1px, transparent 1px);
+      background-size: 60px 60px;
+    }
+    .orb {
+      position: fixed; border-radius: 50%; filter: blur(80px); z-index: 0; animation: float 8s ease-in-out infinite;
+    }
+    .orb-1 { width: 400px; height: 400px; background: rgba(0,200,255,0.04); top: -100px; left: -100px; animation-delay: 0s; }
+    .orb-2 { width: 300px; height: 300px; background: rgba(26,58,107,0.3); bottom: -80px; right: -80px; animation-delay: 3s; }
+    @keyframes float {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-30px) scale(1.05); }
+    }
+
+    /* LAYOUT */
+    .page {
+      position: relative; z-index: 1;
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      padding: 40px 20px;
+    }
+
+    .container {
+      width: 100%; max-width: 440px;
+    }
+
+    /* LOGO/HEADER */
+    .brand {
+      text-align: center; margin-bottom: 48px;
+    }
+    .brand-eyebrow {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 13px; font-weight: 600; letter-spacing: 4px;
+      color: var(--cyan); text-transform: uppercase; margin-bottom: 12px;
+    }
+    .brand-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(52px, 12vw, 72px);
+      line-height: 0.9;
+      background: linear-gradient(135deg, #fff 0%, var(--cyan) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: 2px;
+    }
+    .brand-sub {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 16px; font-weight: 300; letter-spacing: 3px;
+      color: var(--gris); margin-top: 8px;
+    }
+    .brand-line {
+      width: 60px; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+      margin: 20px auto 0;
+    }
+
+    /* CARD */
+    .card {
+      background: rgba(13,32,68,0.7);
+      border: 1px solid rgba(0,200,255,0.15);
+      border-radius: 16px;
+      padding: 40px 36px;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 24px 64px rgba(0,0,0,0.4), inset 0 1px 0 rgba(0,200,255,0.1);
+    }
+
+    /* TABS */
+    .tabs {
+      display: flex; gap: 0;
+      background: rgba(0,0,0,0.3);
+      border-radius: 10px; padding: 4px;
+      margin-bottom: 32px;
+    }
+    .tab {
+      flex: 1; padding: 10px;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 15px; font-weight: 600; letter-spacing: 1px;
+      text-transform: uppercase;
+      background: none; border: none; color: var(--gris);
+      border-radius: 8px; cursor: pointer;
+      transition: all 0.25s;
+    }
+    .tab.active {
+      background: var(--cyan);
+      color: var(--azul);
+    }
+
+    /* FORM */
+    .form-group { margin-bottom: 20px; }
+    label {
+      display: block;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 13px; font-weight: 600; letter-spacing: 2px;
+      text-transform: uppercase; color: var(--gris);
+      margin-bottom: 8px;
+    }
+    input {
+      width: 100%; padding: 14px 18px;
+      background: rgba(0,0,0,0.3);
+      border: 1px solid rgba(0,200,255,0.2);
+      border-radius: 10px;
+      color: var(--blanco);
+      font-family: 'Barlow', sans-serif; font-size: 15px;
+      outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    input:focus {
+      border-color: var(--cyan);
+      box-shadow: 0 0 0 3px rgba(0,200,255,0.1);
+    }
+    input::placeholder { color: rgba(136,153,187,0.5); }
+
+    /* BUTTON */
+    .btn {
+      width: 100%; padding: 16px;
+      background: linear-gradient(135deg, var(--cyan), #0090cc);
+      border: none; border-radius: 10px;
+      color: var(--azul);
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 20px; letter-spacing: 2px;
+      cursor: pointer; margin-top: 8px;
+      transition: all 0.25s;
+      position: relative; overflow: hidden;
+    }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,200,255,0.3); }
+    .btn:active { transform: translateY(0); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    /* MENSAJE */
+    .msg {
+      margin-top: 16px; padding: 12px 16px;
+      border-radius: 8px; font-size: 14px;
+      display: none;
+    }
+    .msg.error { background: rgba(255,60,60,0.15); border: 1px solid rgba(255,60,60,0.3); color: #ff8888; display: block; }
+    .msg.success { background: rgba(0,200,100,0.15); border: 1px solid rgba(0,200,100,0.3); color: #66ffbb; display: block; }
+
+    .divider {
+      text-align: center; margin: 20px 0;
+      font-size: 13px; color: var(--gris);
+      position: relative;
+    }
+    .divider::before, .divider::after {
+      content: ''; position: absolute; top: 50%; width: 40%; height: 1px;
+      background: rgba(0,200,255,0.1);
+    }
+    .divider::before { left: 0; }
+    .divider::after { right: 0; }
+
+    .footer-note {
+      text-align: center; margin-top: 24px;
+      font-size: 12px; color: var(--gris);
+      font-family: 'Barlow Condensed', sans-serif; letter-spacing: 1px;
+    }
+
+    /* PANEL VISIBLE */
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    /* ANIMACIÓN ENTRADA */
+    .card { animation: fadeUp 0.5s ease both; }
+    .brand { animation: fadeUp 0.5s ease both; animation-delay: 0.1s; opacity: 0; animation-fill-mode: forwards; }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <!-- VIDEO FONDO -->
+  <div class="video-bg">
+    <iframe
+      src="https://www.youtube.com/embed/fhEGiIm5fns?autoplay=1&mute=1&loop=1&playlist=fhEGiIm5fns&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1"
+      allow="autoplay; encrypted-media"
+      allowfullscreen>
+    </iframe>
+    <div class="video-bg-overlay"></div>
+  </div>
+
+  <div class="bg"></div>
+  <div class="grid-overlay"></div>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+
+  <div class="page">
+    <div class="container">
+
+      <div class="brand">
+        <div class="brand-eyebrow">Jose Carrizo e Hijos</div>
+        <div class="brand-title">Los 12 Pasos<br>del Piletero</div>
+        <div class="brand-sub">Guía Profesional · Edición Completa</div>
+        <div class="brand-line"></div>
+      </div>
+
+      <div class="card">
+        <div class="tabs">
+          <button class="tab active" onclick="switchTab('login')">Ingresar</button>
+          <button class="tab" onclick="switchTab('register')">Registrarse</button>
+        </div>
+
+        <!-- LOGIN -->
+        <div class="panel active" id="panel-login">
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="login-email" placeholder="tu@email.com" />
+          </div>
+          <div class="form-group">
+            <label>Contraseña</label>
+            <input type="password" id="login-pass" placeholder="••••••••" />
+          </div>
+          <button class="btn" id="btn-login" onclick="doLogin()">Ingresar</button>
+          <div class="msg" id="msg-login"></div>
+        </div>
+
+        <!-- REGISTER -->
+        <div class="panel" id="panel-register">
+          <div class="form-group">
+            <label>Nombre</label>
+            <input type="text" id="reg-name" placeholder="Tu nombre" />
+          </div>
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="reg-email" placeholder="tu@email.com" />
+          </div>
+          <div class="form-group">
+            <label>Contraseña</label>
+            <input type="password" id="reg-pass" placeholder="Mínimo 6 caracteres" />
+          </div>
+          <button class="btn" id="btn-register" onclick="doRegister()">Crear cuenta</button>
+          <div class="msg" id="msg-register"></div>
+        </div>
+
+        <div class="footer-note">🔒 Acceso seguro · Jose Carrizo e Hijos</div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    const SUPABASE_URL = 'https://qwdrddaigmnacdzwlhwm.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF3ZHJkZGFpZ21uYWNkendsaHdtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2NTgwNDAsImV4cCI6MjA5NjIzNDA0MH0.htgA0cm1Ms7rffFm3RNRty3LF-rudRURlZwTjF0CaCg';
+    const { createClient } = supabase;
+    const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // Redirigir si ya está logueado
+    sb.auth.getSession().then(({ data }) => {
+      if (data.session) checkAccessAndRedirect(data.session.user);
+    });
+
+    function switchTab(tab) {
+      document.querySelectorAll('.tab').forEach((t, i) => {
+        t.classList.toggle('active', (i === 0 && tab === 'login') || (i === 1 && tab === 'register'));
+      });
+      document.getElementById('panel-login').classList.toggle('active', tab === 'login');
+      document.getElementById('panel-register').classList.toggle('active', tab === 'register');
+    }
+
+    function showMsg(id, text, type) {
+      const el = document.getElementById(id);
+      el.textContent = text;
+      el.className = 'msg ' + type;
+    }
+
+    async function checkAccessAndRedirect(user) {
+      const { data } = await sb.from('usuarios').select('acceso_activo').eq('id', user.id).single();
+      if (data && data.acceso_activo) {
+        window.location.href = '/pasos.html';
+      } else {
+        window.location.href = '/bienvenida.html';
+      }
+    }
+
+    async function doLogin() {
+      const email = document.getElementById('login-email').value.trim();
+      const pass = document.getElementById('login-pass').value;
+      const btn = document.getElementById('btn-login');
+      if (!email || !pass) return showMsg('msg-login', 'Completá todos los campos.', 'error');
+      btn.disabled = true; btn.textContent = 'Ingresando...';
+      const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
+      if (error) {
+        showMsg('msg-login', 'Email o contraseña incorrectos.', 'error');
+        btn.disabled = false; btn.textContent = 'Ingresar';
+      } else {
+        checkAccessAndRedirect(data.user);
+      }
+    }
+
+    async function doRegister() {
+      const name = document.getElementById('reg-name').value.trim();
+      const email = document.getElementById('reg-email').value.trim();
+      const pass = document.getElementById('reg-pass').value;
+      const btn = document.getElementById('btn-register');
+      if (!name || !email || !pass) return showMsg('msg-register', 'Completá todos los campos.', 'error');
+      if (pass.length < 6) return showMsg('msg-register', 'La contraseña debe tener al menos 6 caracteres.', 'error');
+      btn.disabled = true; btn.textContent = 'Creando cuenta...';
+      const { data, error } = await sb.auth.signUp({ email, password: pass, options: { data: { nombre: name } } });
+      if (error) {
+        showMsg('msg-register', error.message.includes('already') ? 'Ya existe una cuenta con ese email.' : error.message, 'error');
+        btn.disabled = false; btn.textContent = 'Crear cuenta';
+      } else {
+        // Crear registro en tabla usuarios
+        await sb.from('usuarios').insert({ id: data.user.id, email, nombre: name, acceso_activo: false });
+        showMsg('msg-register', '✅ Cuenta creada. Redirigiendo...', 'success');
+        setTimeout(() => { window.location.href = '/bienvenida.html'; }, 1500);
+      }
+    }
+
+    // Enter key support
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        const activePanel = document.querySelector('.panel.active').id;
+        if (activePanel === 'panel-login') doLogin();
+        else doRegister();
+      }
+    });
+  </script>
+</body>
+</html>
